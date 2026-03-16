@@ -40,6 +40,7 @@ async function processNextJob() {
         : 'text/csv';
     const { rows } = parseFile(fileBuf, mime, path.basename(batch.file_path));
 
+    const total = rows.length;
     let processed = 0;
     let success = 0;
     let errorCount = 0;
@@ -90,7 +91,7 @@ async function processNextJob() {
                  success_count = ?, error_count = ?, warning_count = ?,
                  updated_at = datetime('now')
            WHERE id = ?`
-        ).run(processed, processed, success, errorCount, warningCount, batch.id);
+        ).run(total, processed, success, errorCount, warningCount, batch.id);
       }
     }
 
@@ -101,7 +102,7 @@ async function processNextJob() {
              success_count = ?, error_count = ?, warning_count = ?,
              updated_at = datetime('now')
        WHERE id = ?`
-    ).run(processed, processed, success, errorCount, warningCount, batch.id);
+    ).run(total, processed, success, errorCount, warningCount, batch.id);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('Worker failed for batch', batch.id, err);

@@ -26,12 +26,18 @@ export function UploadTab({
           </span>
           {(jobStatus.status === 'processing' || jobStatus.status === 'done') && jobStatus.total_rows > 0 && (
             <div className="status-progress">
-              <div
-                className="status-progress-bar"
-                style={{
-                  width: `${Math.round((jobStatus.processed_rows / jobStatus.total_rows) * 100)}%`
-                }}
-              />
+              <div className="status-progress-bar-wrapper">
+                <div
+                  className="status-progress-bar"
+                  style={{
+                    width: `${Math.round((jobStatus.processed_rows / jobStatus.total_rows) * 100)}%`
+                  }}
+                />
+              </div>
+              <span className="status-progress-text">
+                {jobStatus.processed_rows}/{jobStatus.total_rows} rows (
+                {Math.round((jobStatus.processed_rows / jobStatus.total_rows) * 100)}%)
+              </span>
             </div>
           )}
         </div>

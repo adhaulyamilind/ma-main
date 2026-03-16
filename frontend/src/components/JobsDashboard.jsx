@@ -142,16 +142,23 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
           <tbody>
             {table.getRowModel().rows.map((row) => (
               <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>
-                    {cell.column.id === 'uploaded_at'
-                      ? new Date(cell.getValue()).toLocaleString()
-                      : flexRender(
-                          cell.column.columnDef.cell ?? cell.column.columnDef.header,
-                          cell.getContext()
-                        )}
-                  </td>
-                ))}
+                {row.getVisibleCells().map((cell) => {
+                  const isStatus = cell.column.id === 'status'
+                  const value = cell.getValue()
+                  return (
+                    <td
+                      key={cell.id}
+                      className={isStatus ? `status-cell status-${value}` : undefined}
+                    >
+                      {cell.column.id === 'uploaded_at'
+                        ? new Date(value).toLocaleString()
+                        : flexRender(
+                            cell.column.columnDef.cell ?? cell.column.columnDef.header,
+                            cell.getContext()
+                          )}
+                    </td>
+                  )
+                })}
                 <td>
                   <button type="button" onClick={() => onViewJob(row.original.job_id)}>
                     View

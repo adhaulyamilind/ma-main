@@ -72,6 +72,12 @@
   white-space: nowrap;
 }
 .status-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+.status-progress-bar-wrapper {
   flex: 1;
   background: rgba(31, 41, 55, 0.9);
   border-radius: 999px;
@@ -82,6 +88,11 @@
   height: 100%;
   background: linear-gradient(90deg, #4f46e5, #22c55e);
   transition: width 0.3s ease;
+}
+.status-progress-text {
+  font-size: 0.75rem;
+  color: #d1d5db;
+  white-space: nowrap;
 }
 .status-queued .status-label {
   animation: pulse-text 1.3s ease-in-out infinite;
@@ -149,6 +160,12 @@ table button {
 }
 table button:hover {
   background: rgba(129, 140, 248, 0.65);
+}
+.tan-table td.status-cell.status-queued,
+.tan-table td.status-cell.status-processing {
+  color: #fbbf24;
+  font-weight: 500;
+  animation: pulse-text 1.3s ease-in-out infinite;
 }
 
 .summary-cards {
