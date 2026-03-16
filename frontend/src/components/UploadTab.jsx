@@ -154,7 +154,9 @@ export function UploadTab({
                   Next
                 </button>
               </div>
-              <button onClick={onDownloadErrors}>Download error report (CSV)</button>
+              {result.error_count > 0 && (
+                <button onClick={onDownloadErrors}>Error CSV ⬇</button>
+              )}
             </>
           )}
           <button className="secondary" onClick={onRefreshResult}>Refresh result</button>

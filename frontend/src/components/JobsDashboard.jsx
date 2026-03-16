@@ -147,14 +147,16 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
                 })}
                 <td>
                   <button type="button" onClick={() => onViewJob(row.original.job_id)}>
-                    View
+                    Uploaded file ⬇
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => window.open(errorsCsvUrl(row.original.job_id), '_blank')}
-                  >
-                    Errors CSV
-                  </button>
+                  {row.original.errors > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => window.open(errorsCsvUrl(row.original.job_id), '_blank')}
+                    >
+                      Error CSV ⬇
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
