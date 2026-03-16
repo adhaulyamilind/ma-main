@@ -2,12 +2,12 @@
 
 A full-stack GST Purchase Invoice Data Import tool for AP teams. Upload CSV or Excel files, validate against GST rules, and get row-level error reports plus analytics.
 
-![GST Invoice Upload](</Users/somyadhaulya/.cursor/projects/Users-somyadhaulya-Documents-ma-main/assets/image-f77268ae-f73e-4c6d-896e-e97d53e105d9.png>)
-![Upload progress and preview](</Users/somyadhaulya/.cursor/projects/Users-somyadhaulya-Documents-ma-main/assets/image-cfd8f1e8-42d0-4652-8e28-9aae90401e33.png>)
-![Upload history](</Users/somyadhaulya/.cursor/projects/Users-somyadhaulya-Documents-ma-main/assets/image-2c3541ce-18f3-4be7-9521-3c52e72352b7.png>)
-![Analytics dashboard](</Users/somyadhaulya/.cursor/projects/Users-somyadhaulya-Documents-ma-main/assets/image-ac7b8be1-4aee-485d-99e3-d7c1890d131f.png>)
-![Worker status and polling](</Users/somyadhaulya/.cursor/projects/Users-somyadhaulya-Documents-ma-main/assets/image-a45b33ed-1633-48cf-9108-01f750c6dd71.png>)
-![Import summary and error details](</Users/somyadhaulya/.cursor/projects/Users-somyadhaulya-Documents-ma-main/assets/image-5584cbba-adb2-42e4-9b27-99064baf3076.png>)
+![GST Invoice Upload](docs/screenshots/image-f77268ae-f73e-4c6d-896e-e97d53e105d9.png)
+![Upload progress and preview](docs/screenshots/image-cfd8f1e8-42d0-4652-8e28-9aae90401e33.png)
+![Upload history](docs/screenshots/image-2c3541ce-18f3-4be7-9521-3c52e72352b7.png)
+![Analytics dashboard](docs/screenshots/image-ac7b8be1-4aee-485d-99e3-d7c1890d131f.png)
+![Worker status and polling](docs/screenshots/image-a45b33ed-1633-48cf-9108-01f750c6dd71.png)
+![Import summary and error details](docs/screenshots/image-5584cbba-adb2-42e4-9b27-99064baf3076.png)
 
 ---
 
