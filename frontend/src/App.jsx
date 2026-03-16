@@ -10,6 +10,8 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
+  const [errorPage, setErrorPage] = useState(0)
+  const ERROR_PAGE_SIZE = 10
 
   const onFileChange = (e) => {
     const f = e.target.files?.[0]
@@ -18,6 +20,7 @@ export default function App() {
     setResult(null)
     setError(null)
     setJobId(null)
+    setErrorPage(0)
   }
 
   const upload = async () => {
@@ -133,16 +136,37 @@ export default function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {result.errors.map((e, i) => (
-                      <tr key={i}>
-                        <td>{e.row}</td>
-                        <td>{e.field}</td>
-                        <td>{e.code}</td>
-                        <td>{e.value}</td>
-                      </tr>
-                    ))}
+                    {result.errors
+                      .slice(errorPage * ERROR_PAGE_SIZE, (errorPage + 1) * ERROR_PAGE_SIZE)
+                      .map((e, i) => (
+                        <tr key={i}>
+                          <td>{e.row}</td>
+                          <td>{e.field}</td>
+                          <td>{e.code}</td>
+                          <td>{e.value}</td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
+              </div>
+              <div className="pagination">
+                <button
+                  type="button"
+                  disabled={errorPage === 0}
+                  onClick={() => setErrorPage((p) => p - 1)}
+                >
+                  Prev
+                </button>
+                <span>
+                  Page {errorPage + 1} of {Math.ceil(result.errors.length / ERROR_PAGE_SIZE) || 1}
+                </span>
+                <button
+                  type="button"
+                  disabled={errorPage >= Math.ceil(result.errors.length / ERROR_PAGE_SIZE) - 1}
+                  onClick={() => setErrorPage((p) => p + 1)}
+                >
+                  Next
+                </button>
               </div>
               <button onClick={downloadErrors}>Download error report (CSV)</button>
             </>
