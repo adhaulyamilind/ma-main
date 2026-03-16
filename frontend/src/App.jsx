@@ -82,6 +82,9 @@ export default function App() {
           {loading ? 'Importing...' : 'Upload & Import'}
         </button>
       </div>
+      {!file && (
+        <p className="empty-hint">Select a CSV or Excel file to get started.</p>
+      )}
 
       {error && <div className="error-box">{error}</div>}
 
