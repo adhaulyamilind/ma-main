@@ -7,7 +7,9 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
   const [statusFilter, setStatusFilter] = useState({
     done: false,
     warnings: false,
-    errors: false
+    errors: false,
+    pending: false,
+    failed: false
   })
 
   const filteredJobs = useMemo(() => {
@@ -20,16 +22,25 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
           (j.file_name && j.file_name.toLowerCase().includes(q))
       )
     }
-    const anyStatus = statusFilter.done || statusFilter.warnings || statusFilter.errors
+    const anyStatus =
+      statusFilter.done ||
+      statusFilter.warnings ||
+      statusFilter.errors ||
+      statusFilter.pending ||
+      statusFilter.failed
     if (!anyStatus) return data
     return data.filter((j) => {
       const hasDone = j.imported > 0
       const hasWarnings = j.warnings > 0
       const hasErrors = j.errors > 0
+      const isPending = j.status === 'queued' || j.status === 'processing'
+      const isFailed = j.status === 'failed'
       return (
         (statusFilter.done && hasDone) ||
         (statusFilter.warnings && hasWarnings) ||
-        (statusFilter.errors && hasErrors)
+        (statusFilter.errors && hasErrors) ||
+        (statusFilter.pending && isPending) ||
+        (statusFilter.failed && isFailed)
       )
     })
   }, [jobs, query, statusFilter])
@@ -92,6 +103,26 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
             }
           />
           <span>Has errors</span>
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={statusFilter.pending}
+            onChange={(e) =>
+              setStatusFilter((prev) => ({ ...prev, pending: e.target.checked }))
+            }
+          />
+          <span>Pending</span>
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={statusFilter.failed}
+            onChange={(e) =>
+              setStatusFilter((prev) => ({ ...prev, failed: e.target.checked }))
+            }
+          />
+          <span>Failed</span>
         </label>
       </div>
       <div className="table-wrap">
