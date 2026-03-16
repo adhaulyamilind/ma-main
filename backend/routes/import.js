@@ -31,16 +31,16 @@ router.post('/upload', upload.single('file'), (req, res) => {
   }
   try {
     const taxPeriod = req.body?.tax_period || null;
-    const { job, preview } = createImportJob(
+    const { jobId, preview } = createImportJob(
       req.file.buffer,
       req.file.mimetype,
       req.file.originalname,
       taxPeriod
     );
     res.json({
-      job_id: job.id,
+      job_id: jobId,
       preview_rows: preview,
-      summary: { total_rows: job.totalRows, valid: job.successCount, errors: job.errorCount }
+      summary: { total_rows: null }
     });
   } catch (err) {
     if (err.code === 'NO_ROWS') {

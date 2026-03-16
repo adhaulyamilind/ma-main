@@ -1,84 +1,102 @@
+import fs from 'fs';
+import path from 'path';
 import { parseFile } from '../utils/parser.js';
-import { validateAllRows } from '../utils/validation.js';
+import { getDb } from '../db.js';
 
-const jobs = new Map();
+const db = getDb();
 
 export function createImportJob(fileBuffer, mimeType, originalName, taxPeriod) {
-  const { rows } = parseFile(fileBuffer, mimeType, originalName);
-  if (!rows || rows.length === 0) {
-    const error = new Error('No valid rows in file');
-    error.code = 'NO_ROWS';
-    throw error;
-  }
   const jobId = `job_${Date.now()}`;
-  const { errors, warnings, validRows, successCount, errorCount } = validateAllRows(rows, taxPeriod);
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  const ext = mimeType.includes('spreadsheet') || originalName.endsWith('.xlsx') ? '.xlsx' : '.csv';
+  const filePath = path.join(uploadsDir, `${jobId}${ext}`);
+  fs.writeFileSync(filePath, fileBuffer);
+
+  // build small preview only
+  const { rows } = parseFile(fileBuffer, mimeType, originalName);
   const preview = rows.slice(0, 10);
-  const job = {
-    id: jobId,
-    fileName: originalName,
-    uploadedAt: new Date().toISOString(),
-    status: 'done',
-    totalRows: rows.length,
-    successCount,
-    errorCount,
-    warningCount: warnings.length,
-    errors,
-    warnings,
-    preview,
-    allRows: rows,
-    validRows
-  };
-  jobs.set(jobId, job);
-  return { job, preview };
+
+  db.prepare(
+    `INSERT INTO import_batch (
+      id,file_path,status,created_at,updated_at,
+      total_rows,processed_rows,success_count,error_count,warning_count
+    ) VALUES (?,?, 'queued', datetime('now'), datetime('now'),0,0,0,0,0)`
+  ).run(jobId, filePath);
+
+  return { jobId, preview };
 }
 
 export function listJobs() {
-  return Array.from(jobs.values())
-    .sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1))
-    .map((job) => ({
-      job_id: job.id,
-      file_name: job.fileName,
-      uploaded_at: job.uploadedAt,
-      status: job.status,
-      total_rows: job.totalRows,
-      imported: job.successCount,
-      warnings: job.warningCount || 0,
-      errors: job.errorCount
-    }));
+  const rows = db
+    .prepare(
+      `SELECT id, file_path, status, created_at, updated_at,
+              total_rows, processed_rows, success_count, error_count, warning_count
+         FROM import_batch
+        ORDER BY created_at DESC`
+    )
+    .all();
+  return rows.map((r) => ({
+    job_id: r.id,
+    file_name: path.basename(r.file_path),
+    uploaded_at: r.created_at,
+    status: r.status,
+    total_rows: r.total_rows,
+    imported: r.success_count,
+    warnings: r.warning_count || 0,
+    errors: r.error_count
+  }));
 }
 
 export function getJob(jobId) {
-  return jobs.get(jobId) || null;
+  return db
+    .prepare(
+      `SELECT * FROM import_batch WHERE id = ?`
+    )
+    .get(jobId);
 }
 
 export function getJobStatus(jobId) {
-  const job = jobs.get(jobId);
-  if (!job) return null;
+  const r = getJob(jobId);
+  if (!r) return null;
   return {
-    job_id: job.id,
-    status: job.status,
-    processed_rows: job.successCount + job.errorCount,
-    total_rows: job.totalRows
+    job_id: r.id,
+    status: r.status,
+    processed_rows: r.processed_rows,
+    total_rows: r.total_rows
   };
 }
 
 export function getJobResult(jobId) {
-  const job = jobs.get(jobId);
-  if (!job) return null;
+  const batch = getJob(jobId);
+  if (!batch) return null;
+  const errors = db
+    .prepare(
+      `SELECT row_number as row, field, code, value
+         FROM import_error
+        WHERE batch_id = ?
+        ORDER BY row_number`
+    )
+    .all(jobId);
+  const warnings = []; // could be derived similarly if we persist them
   return {
-    job_id: job.id,
-    status: job.status,
-    total_rows: job.totalRows,
-    success_count: job.successCount,
-    error_count: job.errorCount,
-    warning_count: job.warningCount || 0,
-    errors: job.errors,
-    warnings: job.warnings || []
+    job_id: batch.id,
+    status: batch.status,
+    total_rows: batch.total_rows,
+    success_count: batch.success_count,
+    error_count: batch.error_count,
+    warning_count: batch.warning_count || 0,
+    errors,
+    warnings
   };
 }
 
 export function getAnalytics() {
-  const allJobs = Array.from(jobs.values());
+  const allJobs = db
+    .prepare(
+      `SELECT * FROM import_batch
+       ORDER BY created_at DESC`
+    )
+    .all();
   const totals = { imported: 0, errors: 0, warnings: 0 };
   const statusCounts = {};
   const trend = new Map(); // date (YYYY-MM-DD) -> { date, imported, errors }
@@ -113,17 +131,42 @@ export function getAnalytics() {
     t.imported += job.successCount || 0;
     t.errors += job.errorCount || 0;
 
-    for (const e of job.errors || []) {
+    const jobErrors = db
+      .prepare(
+        `SELECT row_number as row, field, code, value
+           FROM import_error
+          WHERE batch_id = ?`
+      )
+      .all(job.id);
+
+    for (const e of jobErrors) {
       errorReasons.set(e.code, (errorReasons.get(e.code) || 0) + 1);
     }
 
     const errorRowsByJob = new Map();
-    for (const e of job.errors || []) {
+    for (const e of jobErrors) {
       if (!errorRowsByJob.has(e.row)) errorRowsByJob.set(e.row, []);
       errorRowsByJob.get(e.row).push(e);
     }
 
-    for (const row of job.allRows || []) {
+    const rows = db
+      .prepare(
+        `SELECT
+           row_number as _rowIndex,
+           supplier_gstin,
+           invoice_number,
+           invoice_date,
+           taxable_amount,
+           igst_amount,
+           cgst_amount,
+           sgst_amount,
+           place_of_supply
+         FROM invoice
+        WHERE batch_id = ?`
+      )
+      .all(job.id);
+
+    for (const row of rows) {
       const supplier = row.supplier_gstin || 'UNKNOWN';
       if (!supplierQuality.has(supplier)) {
         supplierQuality.set(supplier, {
