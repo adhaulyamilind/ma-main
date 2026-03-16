@@ -6,6 +6,7 @@ export function UploadTab({
   loading,
   preview,
   error,
+  jobStatus,
   result,
   errorPage,
   onUpload,
@@ -15,6 +16,26 @@ export function UploadTab({
 }) {
   return (
     <>
+      {jobStatus && (
+        <div className={`job-status-strip status-${jobStatus.status}`}>
+          <span className="status-label">
+            {jobStatus.status === 'queued' && 'Pending in queue'}
+            {jobStatus.status === 'processing' && 'Processing file'}
+            {jobStatus.status === 'done' && 'Import completed'}
+            {jobStatus.status === 'failed' && 'Import failed'}
+          </span>
+          {(jobStatus.status === 'processing' || jobStatus.status === 'done') && jobStatus.total_rows > 0 && (
+            <div className="status-progress">
+              <div
+                className="status-progress-bar"
+                style={{
+                  width: `${Math.round((jobStatus.processed_rows / jobStatus.total_rows) * 100)}%`
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
       <div className="upload-section">
         <div className="upload-field">
           <label htmlFor="import-file" className="field-label">

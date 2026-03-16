@@ -40,6 +40,16 @@ export function errorsCsvUrl(jobId) {
   return `${API_BASE}/import/${jobId}/errors.csv`
 }
 
+export async function fetchJobStatus(jobId) {
+  const res = await fetch(`${API_BASE}/import/${jobId}/status`)
+  if (!res.ok) {
+    const err = new Error('Failed to fetch job status')
+    err.status = res.status
+    throw err
+  }
+  return res.json()
+}
+
 export async function fetchAnalyticsSummary() {
   const res = await fetch(`${API_BASE}/import/analytics/summary`)
   if (!res.ok) {

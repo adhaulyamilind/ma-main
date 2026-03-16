@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import './App.css'
 import { ERROR_PAGE_SIZE } from './constants'
-import { uploadInvoiceFile, fetchJobsApi, fetchJobResult, errorsCsvUrl, fetchAnalyticsSummary } from './api/importApi'
+import { uploadInvoiceFile, fetchJobsApi, fetchJobResult, errorsCsvUrl, fetchAnalyticsSummary, fetchJobStatus } from './api/importApi'
 import { Tabs } from './components/Tabs'
 import { UploadTab } from './components/UploadTab'
 import { JobsDashboard } from './components/JobsDashboard'
@@ -18,6 +18,8 @@ export default function App() {
   const [jobs, setJobs] = useState([])
   const [activeTab, setActiveTab] = useState('upload')
   const [analytics, setAnalytics] = useState(null)
+  const [jobStatus, setJobStatus] = useState(null)
+  const statusPollRef = useRef(null)
 
   const onFileChange = (e) => {
     const f = e.target.files?.[0]
@@ -27,6 +29,7 @@ export default function App() {
     setError(null)
     setJobId(null)
     setErrorPage(0)
+    setJobStatus(null)
   }
 
   const upload = async () => {
@@ -38,7 +41,7 @@ export default function App() {
       setJobId(data.job_id)
       setPreview(data.preview_rows || [])
       setResult(null)
-      fetchResult(data.job_id)
+      startStatusPolling(data.job_id)
       fetchJobs()
     } catch (err) {
       setError(err.message || 'Upload failed')
@@ -76,6 +79,35 @@ export default function App() {
     setErrorPage(0)
     fetchResult(id)
     setActiveTab('upload')
+  }
+
+  const stopStatusPolling = () => {
+    if (statusPollRef.current) {
+      clearInterval(statusPollRef.current)
+      statusPollRef.current = null
+    }
+  }
+
+  const pollStatusOnce = async (id) => {
+    try {
+      const data = await fetchJobStatus(id)
+      setJobStatus(data)
+      if (data.status === 'done' || data.status === 'failed') {
+        stopStatusPolling()
+        fetchResult(id)
+        fetchJobs()
+      }
+    } catch (_) {
+      // ignore transient status errors
+    }
+  }
+
+  const startStatusPolling = (id) => {
+    setJobStatus({ job_id: id, status: 'queued', processed_rows: 0, total_rows: 0 })
+    stopStatusPolling()
+    pollStatusOnce(id)
+    const timer = setInterval(() => pollStatusOnce(id), 2000)
+    statusPollRef.current = timer
   }
 
   const jobsTableColumns = useMemo(
@@ -161,6 +193,7 @@ export default function App() {
             loading={loading}
             preview={preview}
             error={error}
+            jobStatus={jobStatus}
             result={result}
             errorPage={{
               index: errorPage,
