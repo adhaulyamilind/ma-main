@@ -19,6 +19,7 @@ function initSchema() {
     CREATE TABLE IF NOT EXISTS import_batch (
       id TEXT PRIMARY KEY,
       file_path TEXT NOT NULL,
+      original_name TEXT NOT NULL,
       status TEXT NOT NULL,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,

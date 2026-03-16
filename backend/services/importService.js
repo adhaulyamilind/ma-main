@@ -18,10 +18,10 @@ export function createImportJob(fileBuffer, mimeType, originalName, taxPeriod) {
 
   db.prepare(
     `INSERT INTO import_batch (
-      id,file_path,status,created_at,updated_at,
+      id,file_path,original_name,status,created_at,updated_at,
       total_rows,processed_rows,success_count,error_count,warning_count
-    ) VALUES (?,?, 'queued', datetime('now'), datetime('now'),0,0,0,0,0)`
-  ).run(jobId, filePath);
+    ) VALUES (?,?,?, 'queued', datetime('now'), datetime('now'),0,0,0,0,0)`
+  ).run(jobId, filePath, originalName);
 
   return { jobId, preview };
 }
@@ -30,14 +30,14 @@ export function listJobs() {
   const rows = db
     .prepare(
       `SELECT id, file_path, status, created_at, updated_at,
-              total_rows, processed_rows, success_count, error_count, warning_count
+              original_name, total_rows, processed_rows, success_count, error_count, warning_count
          FROM import_batch
         ORDER BY created_at DESC`
     )
     .all();
   return rows.map((r) => ({
     job_id: r.id,
-    file_name: path.basename(r.file_path),
+    file_name: r.original_name || path.basename(r.file_path),
     uploaded_at: r.created_at,
     status: r.status,
     total_rows: r.total_rows,
