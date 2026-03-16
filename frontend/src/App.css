@@ -1,10 +1,9 @@
 .app {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem 3vw 3rem;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
   color: #f9fafb;
-  min-height: 100vh;
   background: radial-gradient(circle at top left, #1f2937 0, #020617 55%);
 }
 .app h1 { font-size: 1.6rem; margin-bottom: 0.2rem; letter-spacing: 0.02em; }
