@@ -64,9 +64,9 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
             onChange={(e) => setQuery(e.target.value)}
             aria-label="Search uploads by Job ID or file name"
           />
-          <button type="button" onClick={onRefresh}>
+          {/* <button type="button" onClick={onRefresh}>
             Refresh
-          </button>
+          </button> */}
         </div>
       </div>
       <div className="status-filters" aria-label="Filter uploads by result type">
@@ -131,6 +131,8 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
                 {row.getVisibleCells().map((cell) => {
                   const isStatus = cell.column.id === 'status'
                   const value = cell.getValue()
+                  const displayStatus =
+                    isStatus && value === 'queued' ? 'pending' : value
                   return (
                     <td
                       key={cell.id}
@@ -138,6 +140,8 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
                     >
                       {cell.column.id === 'uploaded_at'
                         ? new Date(value).toLocaleString()
+                        : isStatus
+                        ? displayStatus
                         : flexRender(
                             cell.column.columnDef.cell ?? cell.column.columnDef.header,
                             cell.getContext()

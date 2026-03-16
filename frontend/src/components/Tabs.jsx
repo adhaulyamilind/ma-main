@@ -6,7 +6,7 @@ export function Tabs({ active, onChange }) {
         className={active === 'upload' ? 'tab active' : 'tab'}
         onClick={() => onChange('upload')}
       >
-        Upload
+        New Upload
       </button>
       <button
         type="button"
