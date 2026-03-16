@@ -128,50 +128,70 @@ export default function App() {
 
   return (
     <div className="app">
-      <h1>GST Purchase Invoice Import</h1>
-      <p className="sub">Upload CSV or Excel file, and review past imports.</p>
+      <div className="app-inner" aria-label="GST purchase invoice import dashboard">
+        <header className="page-header">
+          <h1>GST Purchase Invoice Import</h1>
+          <p className="sub">
+            Upload purchase invoices, see row-wise validation, and download error reports for corrections.
+          </p>
+          <ul className="feature-list">
+            <li>Step 1: Upload a CSV or Excel file in the expected format.</li>
+            <li>Step 2: Review the preview and import summary.</li>
+            <li>Step 3: Download the Errors CSV to fix issues in your source system.</li>
+          </ul>
+        </header>
 
-      <Tabs
-        active={activeTab}
-        onChange={(tab) => {
-          setActiveTab(tab)
-          if (tab === 'dashboard' || tab === 'analytics') fetchJobs()
-        }}
-      />
-
-      {activeTab === 'upload' && (
-        <UploadTab
-          file={file}
-          onFileChange={onFileChange}
-          loading={loading}
-          preview={preview}
-          error={error}
-          result={result}
-          errorPage={{
-            index: errorPage,
-            start: errorPage * ERROR_PAGE_SIZE,
-            end: (errorPage + 1) * ERROR_PAGE_SIZE,
-            total: result?.errors ? Math.ceil(result.errors.length / ERROR_PAGE_SIZE) : 0
+        <Tabs
+          active={activeTab}
+          onChange={(tab) => {
+            setActiveTab(tab)
+            if (tab === 'dashboard' || tab === 'analytics') fetchJobs()
           }}
-          onUpload={upload}
-          onErrorPageChange={setErrorPage}
-          onDownloadErrors={downloadErrors}
-          onRefreshResult={loadResult}
         />
-      )}
 
-      {activeTab === 'dashboard' && (
-        <JobsDashboard
-          jobs={jobs}
-          columns={jobsTableColumns}
-          onRefresh={fetchJobs}
-          onViewJob={viewJob}
-        />
-      )}
+        {activeTab === 'upload' && (
+          <UploadTab
+            file={file}
+            onFileChange={onFileChange}
+            loading={loading}
+            preview={preview}
+            error={error}
+            result={result}
+            errorPage={{
+              index: errorPage,
+              start: errorPage * ERROR_PAGE_SIZE,
+              end: (errorPage + 1) * ERROR_PAGE_SIZE,
+              total: result?.errors ? Math.ceil(result.errors.length / ERROR_PAGE_SIZE) : 0
+            }}
+            onUpload={upload}
+            onErrorPageChange={setErrorPage}
+            onDownloadErrors={downloadErrors}
+            onRefreshResult={loadResult}
+          />
+        )}
 
-      {activeTab === 'analytics' && (
-        <AnalyticsTab summary={statusSummary} />
-      )}
+        {activeTab === 'dashboard' && (
+          <JobsDashboard
+            jobs={jobs}
+            columns={jobsTableColumns}
+            onRefresh={fetchJobs}
+            onViewJob={viewJob}
+          />
+        )}
+
+        {activeTab === 'analytics' && (
+          <AnalyticsTab summary={statusSummary} />
+        )}
+      </div>
+
+      <a
+        className="floating-template-link"
+        href="/api/import/template.csv"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Download sample CSV
+      </a>
     </div>
   )
 }

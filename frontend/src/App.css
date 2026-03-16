@@ -6,8 +6,25 @@
   color: #f9fafb;
   background: radial-gradient(circle at top left, #1f2937 0, #020617 55%);
 }
-.app h1 { font-size: 1.6rem; margin-bottom: 0.2rem; letter-spacing: 0.02em; }
+.app-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.page-header {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+.app h1 { font-size: 1.8rem; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
 .sub { color: #9ca3af; margin-bottom: 1.5rem; }
+.feature-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+.feature-list li {
+  margin-bottom: 0.35rem;
+}
 .empty-hint { color: #6b7280; font-size: 0.9rem; margin-top: -0.5rem; margin-bottom: 1rem; }
 
 .tabs {
@@ -39,7 +56,21 @@
   align-items: center;
   margin-bottom: 1rem;
 }
-.upload-section input[type="file"] { flex: 1; max-width: 320px; }
+.upload-field {
+  flex: 1;
+}
+.field-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+.field-help {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+.upload-section input[type="file"] { width: 100%; max-width: 420px; }
 .upload-section button {
   padding: 0.5rem 1rem;
   background: linear-gradient(135deg, #4f46e5, #22c55e);
@@ -183,4 +214,22 @@ table button:hover {
   margin: 0 0 0.5rem;
   font-size: 0.95rem;
   color: #e5e7eb;
+}
+
+.floating-template-link {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  color: #e5e7eb;
+  font-size: 0.85rem;
+  text-decoration: none;
+  backdrop-filter: blur(12px);
+}
+.floating-template-link:hover {
+  background: rgba(37, 99, 235, 0.9);
+  border-color: rgba(191, 219, 254, 0.9);
 }

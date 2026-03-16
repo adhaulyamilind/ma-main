@@ -16,8 +16,21 @@ export function UploadTab({
   return (
     <>
       <div className="upload-section">
-        <input type="file" accept=".csv,.xlsx" onChange={onFileChange} />
-        <button onClick={onUpload} disabled={!file || loading}>
+        <div className="upload-field">
+          <label htmlFor="import-file" className="field-label">
+            Select import file
+          </label>
+          <input
+            id="import-file"
+            type="file"
+            accept=".csv,.xlsx"
+            onChange={onFileChange}
+          />
+          <p className="field-help">
+            Accepted formats: CSV or Excel (.xlsx) with the required GST columns.
+          </p>
+        </div>
+        <button type="button" onClick={onUpload} disabled={!file || loading}>
           {loading ? 'Importing...' : 'Upload & Import'}
         </button>
       </div>
@@ -25,7 +38,11 @@ export function UploadTab({
         <p className="empty-hint">Select a CSV or Excel file to get started.</p>
       )}
 
-      {error && <div className="error-box">{error}</div>}
+      {error && (
+        <div className="error-box" role="alert" aria-live="assertive">
+          {error}
+        </div>
+      )}
 
       {preview.length > 0 && (
         <div className="preview-section">

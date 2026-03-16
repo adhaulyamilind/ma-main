@@ -12,6 +12,18 @@ import {
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
+router.get('/template.csv', (req, res) => {
+  const header = 'supplier_gstin,invoice_number,invoice_date,taxable_amount,igst_amount,cgst_amount,sgst_amount,place_of_supply\n';
+  const sample = [
+    '27AABCU9603R1ZX,INV-2024-001,15-10-2024,10000.00,1800.00,0.00,0.00,27',
+    '29AABCU9603R1ZX,INV-2024-002,15-10-2024,5000.00,0.00,450.00,450.00,29',
+    'INVALID_GSTIN,INV-2024-003,15-10-2024,8000.00,1440.00,0.00,0.00,27'
+  ].join('\n');
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="gst-import-template.csv"');
+  res.send(header + sample + '\n');
+});
+
 router.post('/upload', upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
