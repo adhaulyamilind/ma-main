@@ -4,15 +4,35 @@ import { errorsCsvUrl } from '../api/importApi'
 
 export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
   const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState({
+    done: false,
+    warnings: false,
+    errors: false
+  })
+
   const filteredJobs = useMemo(() => {
-    if (!query) return jobs
+    let data = jobs
     const q = query.toLowerCase().trim()
-    return jobs.filter(
-      (j) =>
-        j.job_id.toLowerCase().includes(q) ||
-        (j.file_name && j.file_name.toLowerCase().includes(q))
-    )
-  }, [jobs, query])
+    if (q) {
+      data = data.filter(
+        (j) =>
+          j.job_id.toLowerCase().includes(q) ||
+          (j.file_name && j.file_name.toLowerCase().includes(q))
+      )
+    }
+    const anyStatus = statusFilter.done || statusFilter.warnings || statusFilter.errors
+    if (!anyStatus) return data
+    return data.filter((j) => {
+      const hasDone = j.imported > 0
+      const hasWarnings = j.warnings > 0
+      const hasErrors = j.errors > 0
+      return (
+        (statusFilter.done && hasDone) ||
+        (statusFilter.warnings && hasWarnings) ||
+        (statusFilter.errors && hasErrors)
+      )
+    })
+  }, [jobs, query, statusFilter])
 
   const table = useReactTable({
     data: filteredJobs,
@@ -41,6 +61,38 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
             Refresh
           </button>
         </div>
+      </div>
+      <div className="status-filters" aria-label="Filter uploads by result type">
+        <label>
+          <input
+            type="checkbox"
+            checked={statusFilter.done}
+            onChange={(e) =>
+              setStatusFilter((prev) => ({ ...prev, done: e.target.checked }))
+            }
+          />
+          <span>Has imported rows</span>
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={statusFilter.warnings}
+            onChange={(e) =>
+              setStatusFilter((prev) => ({ ...prev, warnings: e.target.checked }))
+            }
+          />
+          <span>Has warnings</span>
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={statusFilter.errors}
+            onChange={(e) =>
+              setStatusFilter((prev) => ({ ...prev, errors: e.target.checked }))
+            }
+          />
+          <span>Has errors</span>
+        </label>
       </div>
       <div className="table-wrap">
         <table className="tan-table">

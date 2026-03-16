@@ -189,6 +189,27 @@ table button:hover {
   font-size: 0.85rem;
 }
 
+.status-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  color: #e5e7eb;
+}
+.status-filters label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+}
+.status-filters input[type="checkbox"] {
+  accent-color: #22c55e;
+}
+
 .analytics {
   margin-top: 2rem;
 }
