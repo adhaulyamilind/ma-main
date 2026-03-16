@@ -47,11 +47,18 @@ export function UploadTab({
           <label htmlFor="import-file" className="field-label">
             Select import file
           </label>
+          <label htmlFor="import-file" className="file-picker" aria-label="Choose GST import file">
+            <span className="file-picker-main">
+              {file ? file.name : 'Choose a CSV or Excel file'}
+            </span>
+            <span className="file-picker-cta">Browse</span>
+          </label>
           <input
             id="import-file"
             type="file"
             accept=".csv,.xlsx"
             onChange={onFileChange}
+            className="file-input-hidden"
           />
           <p className="field-help">
             Accepted formats: CSV or Excel (.xlsx) with the required GST columns.
