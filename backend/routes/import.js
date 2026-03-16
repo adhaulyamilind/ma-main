@@ -15,6 +15,9 @@ router.post('/upload', upload.single('file'), (req, res) => {
   const jobId = `job_${Date.now()}`;
   const taxPeriod = req.body?.tax_period || null;
   const { rows } = parseFile(req.file.buffer, req.file.mimetype, req.file.originalname);
+  if (!rows || rows.length === 0) {
+    return res.status(400).json({ error: 'No valid rows in file' });
+  }
   const { errors, warnings, validRows, successCount, errorCount } = validateAllRows(rows, taxPeriod);
   const preview = rows.slice(0, 10);
   jobs.set(jobId, {
