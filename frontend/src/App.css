@@ -143,8 +143,17 @@
 .result-section h3 { font-size: 1rem; margin: 1rem 0 0.5rem; }
 
 .table-wrap { overflow-x: auto; margin-bottom: 1rem; }
-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-th, td { border: 1px solid rgba(31, 41, 55, 0.9); padding: 0.5rem 0.7rem; text-align: left; }
+table {
+  width: 100%;
+  min-width: 960px;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+th, td {
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  padding: 0.6rem 0.9rem;
+  text-align: left;
+}
 th { background: rgba(15, 23, 42, 0.95); color: #e5e7eb; font-weight: 500; }
 td { background: rgba(15, 23, 42, 0.75); }
 tr:nth-child(even) td { background: rgba(15, 23, 42, 0.9); }
