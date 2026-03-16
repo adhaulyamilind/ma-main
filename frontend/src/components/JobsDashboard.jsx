@@ -51,9 +51,9 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
     <div className="preview-section">
       <div className="dashboard-header">
         <div>
-          <h2>Previous uploads</h2>
+          <h2>Upload history</h2>
           <p className="sub small">
-            Search by Job ID or file name to quickly inspect a past run.
+            Search by Job ID or file name, then drill into details or download CSVs.
           </p>
         </div>
         <div className="dashboard-controls">

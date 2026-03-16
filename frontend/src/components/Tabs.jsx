@@ -13,7 +13,7 @@ export function Tabs({ active, onChange }) {
         className={active === 'dashboard' ? 'tab active' : 'tab'}
         onClick={() => onChange('dashboard')}
       >
-        Previous uploads
+        Upload history
       </button>
       <button
         type="button"
