@@ -5,7 +5,6 @@ import { errorsCsvUrl } from '../api/importApi'
 export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState({
-    done: false,
     warnings: false,
     errors: false,
     pending: false,
@@ -23,20 +22,17 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
       )
     }
     const anyStatus =
-      statusFilter.done ||
       statusFilter.warnings ||
       statusFilter.errors ||
       statusFilter.pending ||
       statusFilter.failed
     if (!anyStatus) return data
     return data.filter((j) => {
-      const hasDone = j.imported > 0
       const hasWarnings = j.warnings > 0
       const hasErrors = j.errors > 0
       const isPending = j.status === 'queued' || j.status === 'processing'
       const isFailed = j.status === 'failed'
       return (
-        (statusFilter.done && hasDone) ||
         (statusFilter.warnings && hasWarnings) ||
         (statusFilter.errors && hasErrors) ||
         (statusFilter.pending && isPending) ||
@@ -74,16 +70,6 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
         </div>
       </div>
       <div className="status-filters" aria-label="Filter uploads by result type">
-        <label>
-          <input
-            type="checkbox"
-            checked={statusFilter.done}
-            onChange={(e) =>
-              setStatusFilter((prev) => ({ ...prev, done: e.target.checked }))
-            }
-          />
-          <span>Has imported rows</span>
-        </label>
         <label>
           <input
             type="checkbox"
