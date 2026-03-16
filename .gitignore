@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Local DB and uploads
+*.db
+*.db-journal
+backend/uploads/
+
+# Env and logs
+.env
+.env.*
+*.log
+
+# OS / editor
+.DS_Store
+.idea
+.vscode/

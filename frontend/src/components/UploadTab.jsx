@@ -9,6 +9,7 @@ export function UploadTab({
   jobStatus,
   result,
   errorPage,
+  currentPageErrors,
   onUpload,
   onErrorPageChange,
   onDownloadErrors,
@@ -115,7 +116,7 @@ export function UploadTab({
               <div className="card warn">Warnings: {result.warning_count}</div>
             )}
           </div>
-          {result.errors?.length > 0 && (
+          {result.error_count > 0 && (
             <>
               <h3>Error details</h3>
               <div className="table-wrap">
@@ -129,16 +130,14 @@ export function UploadTab({
                     </tr>
                   </thead>
                   <tbody>
-                    {result.errors
-                      .slice(errorPage.start, errorPage.end)
-                      .map((e, i) => (
-                        <tr key={i}>
-                          <td>{e.row}</td>
-                          <td>{e.field}</td>
-                          <td>{e.code}</td>
-                          <td>{e.value}</td>
-                        </tr>
-                      ))}
+                    {(currentPageErrors || []).map((e, i) => (
+                      <tr key={i}>
+                        <td>{e.row}</td>
+                        <td>{e.field}</td>
+                        <td>{e.code}</td>
+                        <td>{e.value}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

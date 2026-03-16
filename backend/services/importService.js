@@ -66,18 +66,24 @@ export function getJobStatus(jobId) {
   };
 }
 
+const RESULT_ERRORS_MAX = 500;
+
 export function getJobResult(jobId) {
   const batch = getJob(jobId);
   if (!batch) return null;
-  const errors = db
-    .prepare(
-      `SELECT row_number as row, field, code, value
-         FROM import_error
-        WHERE batch_id = ?
-        ORDER BY row_number`
-    )
-    .all(jobId);
-  const warnings = []; // could be derived similarly if we persist them
+  const totalErrors = batch.error_count || 0;
+  const loadAll = totalErrors <= RESULT_ERRORS_MAX;
+  const errors = loadAll
+    ? db
+        .prepare(
+          `SELECT row_number as row, field, code, value
+             FROM import_error
+            WHERE batch_id = ?
+            ORDER BY row_number`
+        )
+        .all(jobId)
+    : [];
+  const warnings = [];
   return {
     job_id: batch.id,
     status: batch.status,
@@ -88,6 +94,23 @@ export function getJobResult(jobId) {
     errors,
     warnings
   };
+}
+
+export function getJobErrorsPage(jobId, page = 1, limit = 50) {
+  const batch = getJob(jobId);
+  if (!batch) return null;
+  const total = batch.error_count || 0;
+  const offset = (Math.max(1, page) - 1) * limit;
+  const errors = db
+    .prepare(
+      `SELECT row_number as row, field, code, value
+         FROM import_error
+        WHERE batch_id = ?
+        ORDER BY row_number
+        LIMIT ? OFFSET ?`
+    )
+    .all(jobId, limit, offset);
+  return { errors, total };
 }
 
 export function getAnalytics() {

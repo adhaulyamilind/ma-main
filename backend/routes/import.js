@@ -6,6 +6,7 @@ import {
   getJob,
   getJobResult,
   getJobStatus,
+  getJobErrorsPage,
   listJobs,
   getAnalytics
 } from '../services/importService.js';
@@ -70,6 +71,14 @@ router.get('/:jobId/result', (req, res) => {
   const result = getJobResult(req.params.jobId);
   if (!result) return res.status(404).json({ error: 'Job not found' });
   res.json(result);
+});
+
+router.get('/:jobId/errors', (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 50));
+  const data = getJobErrorsPage(req.params.jobId, page, limit);
+  if (!data) return res.status(404).json({ error: 'Job not found' });
+  res.json(data);
 });
 
 router.get('/:jobId/errors.csv', (req, res) => {

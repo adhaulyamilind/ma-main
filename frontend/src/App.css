@@ -45,6 +45,24 @@
   font-size: 0.75rem;
   color: #9ca3af;
 }
+.nav-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.help-link {
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  color: #e5e7eb;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.help-link:hover {
+  background: rgba(55, 65, 81, 0.9);
+  border-color: rgba(191, 219, 254, 0.6);
+}
 .avatar-pill {
   display: inline-flex;
   align-items: center;
@@ -519,4 +537,110 @@ tbody tr:hover td {
 .floating-template-link:hover {
   background: rgba(37, 99, 235, 0.9);
   border-color: rgba(191, 219, 254, 0.9);
+}
+
+/* Help page */
+.help-page {
+  margin-top: 1rem;
+  padding: 1rem 0;
+  max-width: 960px;
+  width: 100%;
+}
+.help-page .table-wrap {
+  max-width: 100%;
+}
+.help-page .help-table {
+  width: 100%;
+}
+.help-header {
+  margin-bottom: 1.5rem;
+}
+.help-header h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+.help-back {
+  margin-top: 0.75rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  background: rgba(55, 65, 81, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  color: #e5e7eb;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.help-back:hover {
+  background: rgba(79, 70, 229, 0.8);
+  border-color: rgba(191, 219, 254, 0.6);
+}
+.help-section {
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+}
+.help-section:last-of-type {
+  border-bottom: none;
+}
+.help-section h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #e5e7eb;
+}
+.help-intro {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+.help-steps, .help-list {
+  margin: 0 0 0 1rem;
+  padding-left: 0.5rem;
+  color: #d1d5db;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.help-steps li, .help-list li {
+  margin-bottom: 0.5rem;
+}
+.help-dl {
+  margin: 0;
+  color: #d1d5db;
+  font-size: 0.9rem;
+}
+.help-dl dt {
+  font-weight: 600;
+  color: #e5e7eb;
+  margin-top: 0.75rem;
+  margin-bottom: 0.2rem;
+}
+.help-dl dt:first-child {
+  margin-top: 0;
+}
+.help-dl dd {
+  margin-left: 0;
+  padding-left: 0;
+  margin-bottom: 0.25rem;
+  opacity: 0.95;
+}
+.help-code {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(55, 65, 81, 0.8);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0.5rem 0 0.75rem;
+  overflow-x: auto;
+}
+.help-page .help-table {
+  min-width: 0;
+  font-size: 0.9rem;
+}
+.help-page .help-table th {
+  white-space: nowrap;
+  width: 1%;
+  min-width: 120px;
+}
+.help-page .help-table td {
+  vertical-align: top;
 }

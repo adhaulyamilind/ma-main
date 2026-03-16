@@ -9,15 +9,9 @@ export function AnalyticsTab({ summary }) {
   const filteredTrend = useMemo(() => {
     if (!summary.trend || summary.trend.length === 0) return []
     const now = new Date()
-    let windowMs
-    if (range === '10m') windowMs = 10 * 60 * 1000
-    else if (range === '1h') windowMs = 60 * 60 * 1000
-    else if (range === '1d') windowMs = 24 * 60 * 60 * 1000
-    else if (range === '1mo') windowMs = 30 * 24 * 60 * 60 * 1000
-    else windowMs = null
-
-    if (!windowMs) return summary.trend
-
+    const windowMs = range === '1d'
+      ? 24 * 60 * 60 * 1000
+      : 30 * 24 * 60 * 60 * 1000
     return summary.trend.filter((point) => {
       const ts = point.date ? new Date(point.date).getTime() : NaN
       if (Number.isNaN(ts)) return false
@@ -62,20 +56,6 @@ export function AnalyticsTab({ summary }) {
         <div className="chart-header">
           <h3>Import quality over time</h3>
           <div className="chart-range-tabs" aria-label="Time range for import quality chart">
-            <button
-              type="button"
-              className={range === '10m' ? 'range-pill active' : 'range-pill'}
-              onClick={() => setRange('10m')}
-            >
-              10 min
-            </button>
-            <button
-              type="button"
-              className={range === '1h' ? 'range-pill active' : 'range-pill'}
-              onClick={() => setRange('1h')}
-            >
-              1 hr
-            </button>
             <button
               type="button"
               className={range === '1d' ? 'range-pill active' : 'range-pill'}

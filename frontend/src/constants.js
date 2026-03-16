@@ -11,5 +11,5 @@ export const INVOICE_COLUMNS = [
   'place_of_supply'
 ]
 
-export const ERROR_PAGE_SIZE = 10
+export const ERROR_PAGE_SIZE = 50
 

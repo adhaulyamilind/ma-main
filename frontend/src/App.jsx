@@ -1,11 +1,12 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, useEffect } from 'react'
 import './App.css'
 import { ERROR_PAGE_SIZE } from './constants'
-import { uploadInvoiceFile, fetchJobsApi, fetchJobResult, errorsCsvUrl, fetchAnalyticsSummary, fetchJobStatus } from './api/importApi'
+import { uploadInvoiceFile, fetchJobsApi, fetchJobResult, fetchJobErrorsPage, errorsCsvUrl, fetchAnalyticsSummary, fetchJobStatus } from './api/importApi'
 import { Tabs } from './components/Tabs'
 import { UploadTab } from './components/UploadTab'
 import { JobsDashboard } from './components/JobsDashboard'
 import { AnalyticsTab } from './components/AnalyticsTab'
+import { HelpPage } from './components/HelpPage'
 
 export default function App() {
   const [file, setFile] = useState(null)
@@ -19,7 +20,20 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('upload')
   const [analytics, setAnalytics] = useState(null)
   const [jobStatus, setJobStatus] = useState(null)
+  const [errorPageData, setErrorPageData] = useState({ errors: [], total: 0 })
   const statusPollRef = useRef(null)
+
+  useEffect(() => {
+    if (!jobId || !result || result.error_count <= 0) {
+      setErrorPageData({ errors: [], total: 0 })
+      return
+    }
+    const usePaginatedApi = !result.errors || result.errors.length === 0
+    if (!usePaginatedApi) return
+    fetchJobErrorsPage(jobId, errorPage + 1, ERROR_PAGE_SIZE)
+      .then((data) => setErrorPageData({ errors: data.errors || [], total: data.total || 0 }))
+      .catch(() => setErrorPageData({ errors: [], total: result.error_count }))
+  }, [jobId, result, errorPage])
 
   const onFileChange = (e) => {
     const f = e.target.files?.[0]
@@ -77,6 +91,7 @@ export default function App() {
     setJobId(id)
     setResult(null)
     setErrorPage(0)
+    setErrorPageData({ errors: [], total: 0 })
     fetchResult(id)
     setActiveTab('upload')
   }
@@ -159,6 +174,22 @@ export default function App() {
 
   const columns = ['supplier_gstin', 'invoice_number', 'invoice_date', 'taxable_amount', 'igst_amount', 'cgst_amount', 'sgst_amount', 'place_of_supply']
 
+  const displayErrors = useMemo(() => {
+    if (!result || result.error_count <= 0) return []
+    if (result.errors && result.errors.length > 0) {
+      const start = errorPage * ERROR_PAGE_SIZE
+      return result.errors.slice(start, start + ERROR_PAGE_SIZE)
+    }
+    return errorPageData.errors || []
+  }, [result, errorPage, errorPageData.errors])
+
+  const errorTotalPages = useMemo(() => {
+    if (!result || result.error_count <= 0) return 0
+    if (result.errors && result.errors.length > 0)
+      return Math.ceil(result.errors.length / ERROR_PAGE_SIZE)
+    return Math.ceil((errorPageData.total || 0) / ERROR_PAGE_SIZE)
+  }, [result, errorPageData.total])
+
   return (
     <div className="app">
       <div className="app-inner" aria-label="GST purchase invoice import dashboard">
@@ -180,14 +211,27 @@ export default function App() {
               }
             }}
           />
-          <button className="avatar-pill" type="button" aria-label="User profile menu">
-            <span className="avatar-circle" aria-hidden="true">
-              MA
-            </span>
-            <span className="avatar-name">Milind</span>
-          </button>
+          <div className="nav-right">
+            <button
+              type="button"
+              className="help-link"
+              onClick={() => setActiveTab('help')}
+            >
+              Help
+            </button>
+            <button className="avatar-pill" type="button" aria-label="User profile menu">
+              <span className="avatar-circle" aria-hidden="true">
+                MA
+              </span>
+              <span className="avatar-name">Milind</span>
+            </button>
+          </div>
         </header>
 
+        {activeTab === 'help' ? (
+          <HelpPage onBack={() => setActiveTab('upload')} />
+        ) : (
+        <>
         <section className="page-header">
           
           {activeTab === 'upload' && (
@@ -227,12 +271,8 @@ export default function App() {
             error={error}
             jobStatus={jobStatus}
             result={result}
-            errorPage={{
-              index: errorPage,
-              start: errorPage * ERROR_PAGE_SIZE,
-              end: (errorPage + 1) * ERROR_PAGE_SIZE,
-              total: result?.errors ? Math.ceil(result.errors.length / ERROR_PAGE_SIZE) : 0
-            }}
+            errorPage={{ index: errorPage, total: errorTotalPages }}
+            currentPageErrors={displayErrors}
             onUpload={upload}
             onErrorPageChange={setErrorPage}
             onDownloadErrors={downloadErrors}
@@ -251,6 +291,8 @@ export default function App() {
 
         {activeTab === 'analytics' && (
         <AnalyticsTab summary={analytics || { ...statusSummary, jobStatusTotals: null, trend: [], errorReasons: [], supplierQuality: [], posMix: [], rateBuckets: [] }} />
+        )}
+        </>
         )}
       </div>
 

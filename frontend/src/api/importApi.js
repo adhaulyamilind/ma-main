@@ -36,6 +36,12 @@ export async function fetchJobResult(jobId) {
   return res.json()
 }
 
+export async function fetchJobErrorsPage(jobId, page = 1, limit = 50) {
+  const res = await fetch(`${API_BASE}/import/${jobId}/errors?page=${page}&limit=${limit}`)
+  if (!res.ok) return { errors: [], total: 0 }
+  return res.json()
+}
+
 export function errorsCsvUrl(jobId) {
   return `${API_BASE}/import/${jobId}/errors.csv`
 }
