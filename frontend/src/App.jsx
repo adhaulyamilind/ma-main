@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts'
 import './App.css'
 
 const API = '/api'
@@ -89,6 +91,59 @@ export default function App() {
     setActiveTab('upload')
   }
 
+  const jobsTableColumns = useMemo(
+    () => [
+      { header: 'Job ID', accessorKey: 'job_id' },
+      { header: 'File', accessorKey: 'file_name' },
+      { header: 'Uploaded at', accessorKey: 'uploaded_at' },
+      { header: 'Status', accessorKey: 'status' },
+      {
+        header: 'Imported',
+        accessorKey: 'imported'
+      },
+      {
+        header: 'Warnings',
+        accessorKey: 'warnings'
+      },
+      {
+        header: 'Errors',
+        accessorKey: 'errors'
+      }
+    ],
+    []
+  )
+
+  const table = useReactTable({
+    data: jobs,
+    columns: jobsTableColumns,
+    getCoreRowModel: getCoreRowModel()
+  })
+
+  const statusSummary = useMemo(() => {
+    const counts = {}
+    let totalImported = 0
+    let totalErrors = 0
+    let totalWarnings = 0
+    jobs.forEach((j) => {
+      counts[j.status] = (counts[j.status] || 0) + 1
+      totalImported += j.imported || 0
+      totalErrors += j.errors || 0
+      totalWarnings += j.warnings || 0
+    })
+    const statusData = Object.entries(counts).map(([status, value]) => ({ status, value }))
+    const byJobErrors = jobs.map((j) => ({
+      job: j.job_id.slice(0, 6),
+      errors: j.errors || 0,
+      warnings: j.warnings || 0,
+      imported: j.imported || 0
+    }))
+    return {
+      statusData,
+      byJobErrors,
+      totals: { imported: totalImported, errors: totalErrors, warnings: totalWarnings }
+    }
+  }, [jobs])
+
   const columns = ['supplier_gstin', 'invoice_number', 'invoice_date', 'taxable_amount', 'igst_amount', 'cgst_amount', 'sgst_amount', 'place_of_supply']
 
   return (
@@ -113,6 +168,16 @@ export default function App() {
           }}
         >
           Imports dashboard
+        </button>
+        <button
+          type="button"
+          className={activeTab === 'analytics' ? 'tab active' : 'tab'}
+          onClick={() => {
+            setActiveTab('analytics')
+            fetchJobs()
+          }}
+        >
+          Analytics
         </button>
       </div>
 
@@ -231,47 +296,111 @@ export default function App() {
             </button>
           </div>
           <div className="table-wrap">
-            <table>
+            <table className="tan-table">
               <thead>
-                <tr>
-                  <th>Job ID</th>
-                  <th>File</th>
-                  <th>Uploaded at</th>
-                  <th>Status</th>
-                  <th>Summary</th>
-                  <th>Actions</th>
-                </tr>
+                {table.getHeaderGroups().map((hg) => (
+                  <tr key={hg.id}>
+                    {hg.headers.map((header) => (
+                      <th key={header.id}>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </th>
+                    ))}
+                    <th>Actions</th>
+                  </tr>
+                ))}
               </thead>
               <tbody>
-                {jobs.map((j) => (
-                  <tr key={j.job_id}>
-                    <td>{j.job_id}</td>
-                    <td>{j.file_name}</td>
-                    <td>{new Date(j.uploaded_at).toLocaleString()}</td>
-                    <td>{j.status}</td>
+                {table.getRowModel().rows.map((row) => (
+                  <tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id}>
+                        {cell.column.id === 'uploaded_at'
+                          ? new Date(cell.getValue()).toLocaleString()
+                          : flexRender(cell.column.columnDef.cell ?? cell.column.columnDef.header, cell.getContext())}
+                      </td>
+                    ))}
                     <td>
-                      {j.imported} imported · {j.warnings} warnings · {j.errors} errors
-                    </td>
-                    <td>
-                      <button type="button" onClick={() => viewJob(j.job_id)}>
+                      <button type="button" onClick={() => viewJob(row.original.job_id)}>
                         View
                       </button>
                       <button
                         type="button"
-                        onClick={() => window.open(`${API}/import/${j.job_id}/errors.csv`, '_blank')}
+                        onClick={() =>
+                          window.open(`${API}/import/${row.original.job_id}/errors.csv`, '_blank')
+                        }
                       >
                         Errors CSV
                       </button>
                     </td>
                   </tr>
                 ))}
-                {jobs.length === 0 && (
+                {table.getRowModel().rows.length === 0 && (
                   <tr>
-                    <td colSpan={6}>No imports yet.</td>
+                    <td colSpan={jobsTableColumns.length + 1}>No imports yet.</td>
                   </tr>
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'analytics' && (
+        <div className="analytics">
+          <div className="summary-row">
+            <div className="metric-card primary">
+              <div className="metric-label">Imported invoices</div>
+              <div className="metric-value">{statusSummary.totals.imported}</div>
+            </div>
+            <div className="metric-card warn">
+              <div className="metric-label">Warnings</div>
+              <div className="metric-value">{statusSummary.totals.warnings}</div>
+            </div>
+            <div className="metric-card err">
+              <div className="metric-label">Errors</div>
+              <div className="metric-value">{statusSummary.totals.errors}</div>
+            </div>
+          </div>
+
+          <div className="charts-grid">
+            <div className="chart-card">
+              <h3>Jobs by status</h3>
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie
+                    data={statusSummary.statusData}
+                    dataKey="value"
+                    nameKey="status"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={70}
+                    label
+                  >
+                    {statusSummary.statusData.map((entry, index) => {
+                      const colors = ['#4ade80', '#60a5fa', '#f97373', '#fbbf24']
+                      return <Cell key={entry.status} fill={colors[index % colors.length]} />
+                    })}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="chart-card">
+              <h3>Errors / warnings per job</h3>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={statusSummary.byJobErrors}>
+                  <XAxis dataKey="job" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="imported" stackId="a" fill="#22c55e" />
+                  <Bar dataKey="warnings" stackId="a" fill="#fbbf24" />
+                  <Bar dataKey="errors" stackId="a" fill="#f97373" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       )}
