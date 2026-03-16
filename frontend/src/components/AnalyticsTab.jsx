@@ -1,4 +1,4 @@
-import { Bar, BarChart, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from 'recharts'
+import { Bar, BarChart, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from 'recharts'
 
 const STATUS_COLORS = ['#4ade80', '#60a5fa', '#f97373', '#fbbf24']
 
@@ -21,6 +21,20 @@ export function AnalyticsTab({ summary }) {
       </div>
 
       <div className="charts-grid">
+        <div className="chart-card">
+          <h3>Import quality over time</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={summary.trend}>
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="imported" stroke="#22c55e" />
+              <Line type="monotone" dataKey="errors" stroke="#f97373" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
         <div className="chart-card">
           <h3>Jobs by status</h3>
           <ResponsiveContainer width="100%" height={220}>
@@ -55,6 +69,56 @@ export function AnalyticsTab({ summary }) {
               <Bar dataKey="imported" stackId="a" fill="#22c55e" />
               <Bar dataKey="warnings" stackId="a" fill="#fbbf24" />
               <Bar dataKey="errors" stackId="a" fill="#f97373" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-card">
+          <h3>Top error reasons</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={summary.errorReasons} layout="vertical" margin={{ left: 60 }}>
+              <XAxis type="number" />
+              <YAxis dataKey="code" type="category" />
+              <Tooltip />
+              <Bar dataKey="count" fill="#f97373" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-card">
+          <h3>Supplier wise quality</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={summary.supplierQuality}>
+              <XAxis dataKey="supplier" tickFormatter={(v) => (v || '').slice(0, 6)} />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="imported" stackId="a" fill="#22c55e" />
+              <Bar dataKey="errors" stackId="a" fill="#f97373" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-card">
+          <h3>Place of supply mix</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={summary.posMix}>
+              <XAxis dataKey="pos" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="count" fill="#60a5fa" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-card">
+          <h3>Effective GST rate distribution</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={summary.rateBuckets}>
+              <XAxis dataKey="bucket" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="count" fill="#a855f7" />
             </BarChart>
           </ResponsiveContainer>
         </div>

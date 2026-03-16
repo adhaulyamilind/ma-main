@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import './App.css'
 import { ERROR_PAGE_SIZE } from './constants'
-import { uploadInvoiceFile, fetchJobsApi, fetchJobResult, errorsCsvUrl } from './api/importApi'
+import { uploadInvoiceFile, fetchJobsApi, fetchJobResult, errorsCsvUrl, fetchAnalyticsSummary } from './api/importApi'
 import { Tabs } from './components/Tabs'
 import { UploadTab } from './components/UploadTab'
 import { JobsDashboard } from './components/JobsDashboard'
@@ -17,6 +17,7 @@ export default function App() {
   const [errorPage, setErrorPage] = useState(0)
   const [jobs, setJobs] = useState([])
   const [activeTab, setActiveTab] = useState('upload')
+  const [analytics, setAnalytics] = useState(null)
 
   const onFileChange = (e) => {
     const f = e.target.files?.[0]
@@ -145,7 +146,11 @@ export default function App() {
           active={activeTab}
           onChange={(tab) => {
             setActiveTab(tab)
-            if (tab === 'dashboard' || tab === 'analytics') fetchJobs()
+            if (tab === 'dashboard') fetchJobs()
+            if (tab === 'analytics') {
+              fetchJobs()
+              fetchAnalyticsSummary().then(setAnalytics).catch(() => {})
+            }
           }}
         />
 
@@ -180,7 +185,7 @@ export default function App() {
         )}
 
         {activeTab === 'analytics' && (
-          <AnalyticsTab summary={statusSummary} />
+        <AnalyticsTab summary={analytics || { ...statusSummary, trend: [], errorReasons: [], supplierQuality: [], posMix: [], rateBuckets: [] }} />
         )}
       </div>
 

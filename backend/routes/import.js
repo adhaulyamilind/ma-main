@@ -6,7 +6,8 @@ import {
   getJob,
   getJobResult,
   getJobStatus,
-  listJobs
+  listJobs,
+  getAnalytics
 } from '../services/importService.js';
 
 const router = express.Router();
@@ -53,6 +54,10 @@ router.post('/upload', upload.single('file'), (req, res) => {
 
 router.get('/', (req, res) => {
   res.json({ jobs: listJobs() });
+});
+
+router.get('/analytics/summary', (req, res) => {
+  res.json(getAnalytics());
 });
 
 router.get('/:jobId/status', (req, res) => {

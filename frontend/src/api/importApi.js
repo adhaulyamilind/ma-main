@@ -40,3 +40,20 @@ export function errorsCsvUrl(jobId) {
   return `${API_BASE}/import/${jobId}/errors.csv`
 }
 
+export async function fetchAnalyticsSummary() {
+  const res = await fetch(`${API_BASE}/import/analytics/summary`)
+  if (!res.ok) {
+    return {
+      totals: { imported: 0, errors: 0, warnings: 0 },
+      statusData: [],
+      byJobErrors: [],
+      trend: [],
+      errorReasons: [],
+      supplierQuality: [],
+      posMix: [],
+      rateBuckets: []
+    }
+  }
+  return res.json()
+}
+
