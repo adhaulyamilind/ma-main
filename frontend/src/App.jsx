@@ -162,29 +162,61 @@ export default function App() {
   return (
     <div className="app">
       <div className="app-inner" aria-label="GST purchase invoice import dashboard">
-        <header className="page-header">
-          <h1>GST Purchase Invoice Import</h1>
-          <p className="sub">
-            Upload purchase invoices, see row-wise validation, and download error reports for corrections.
-          </p>
-          <ul className="feature-list">
-            <li>Step 1: Upload a CSV or Excel file in the expected format.</li>
-            <li>Step 2: Review the preview and import summary.</li>
-            <li>Step 3: Download the Errors CSV to fix issues in your source system.</li>
-          </ul>
+        <header className="top-nav">
+          <div className="brand">
+            <div className="brand-mark" aria-hidden="true" />
+            <div>
+              <div className="brand-name">GST Reconciliation Tool</div>
+            </div>
+          </div>
+          <Tabs
+            active={activeTab}
+            onChange={(tab) => {
+              setActiveTab(tab)
+              if (tab === 'dashboard') fetchJobs()
+              if (tab === 'analytics') {
+                fetchJobs()
+                fetchAnalyticsSummary().then(setAnalytics).catch(() => {})
+              }
+            }}
+          />
+          <button className="avatar-pill" type="button" aria-label="User profile menu">
+            <span className="avatar-circle" aria-hidden="true">
+              MA
+            </span>
+            <span className="avatar-name">Milind</span>
+          </button>
         </header>
 
-        <Tabs
-          active={activeTab}
-          onChange={(tab) => {
-            setActiveTab(tab)
-            if (tab === 'dashboard') fetchJobs()
-            if (tab === 'analytics') {
-              fetchJobs()
-              fetchAnalyticsSummary().then(setAnalytics).catch(() => {})
-            }
-          }}
-        />
+        <section className="page-header">
+          
+          {activeTab === 'upload' && (
+            <>
+              <h1>GST Invoice Upload</h1>
+              <p className="sub">
+                Upload purchase invoices once, let the tool handle row‑level validation, and keep finance teams in sync.
+              </p>
+              <ul className="feature-list">
+                <li>Upload CSV or Excel in the recommended GST template.</li>
+                <li>Track each import in real time with clear progress and statuses.</li>
+                <li>Export error CSVs that you can share with vendors or internal owners.</li>
+              </ul>
+            </>
+          )}
+          {activeTab === 'dashboard' && (
+            <>
+              <h1>GST Invoice Details</h1>
+              <p className="sub">
+                Review the full history of imports, drill into individual jobs, and quickly spot files that need attention.
+              </p>
+              <ul className="feature-list">
+                <li>Search by Job ID or file name to locate a past upload in seconds.</li>
+                <li>Filter by pending, failed, or warning‑heavy jobs to prioritise follow‑ups.</li>
+                <li>Download the original file or its error CSV for audit and correction workflows.</li>
+              </ul>
+            </>
+          )}
+        </section>
 
         {activeTab === 'upload' && (
           <UploadTab

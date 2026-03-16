@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table'
+import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table'
 import { errorsCsvUrl } from '../api/importApi'
 
 export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
@@ -10,6 +10,7 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
     pending: false,
     failed: false
   })
+  const [sorting, setSorting] = useState([])
 
   const filteredJobs = useMemo(() => {
     let data = jobs
@@ -44,7 +45,10 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
   const table = useReactTable({
     data: filteredJobs,
     columns,
-    getCoreRowModel: getCoreRowModel()
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel()
   })
 
   return (
@@ -131,17 +135,25 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
                 {row.getVisibleCells().map((cell) => {
                   const isStatus = cell.column.id === 'status'
                   const value = cell.getValue()
-                  const displayStatus =
-                    isStatus && value === 'queued' ? 'pending' : value
+                  const isUploadedAt = cell.column.id === 'uploaded_at'
+                  let display = value
+                  if (isStatus) {
+                    if (value === 'queued' || value === 'processing') display = 'pending'
+                    if (value === 'done') display = 'success'
+                  }
                   return (
                     <td
                       key={cell.id}
                       className={isStatus ? `status-cell status-${value}` : undefined}
                     >
-                      {cell.column.id === 'uploaded_at'
+                      {isUploadedAt
                         ? new Date(value).toLocaleString()
                         : isStatus
-                        ? displayStatus
+                        ? (
+                          <span className={`status-chip status-chip-${display}`}>
+                            {display}
+                          </span>
+                          )
                         : flexRender(
                             cell.column.columnDef.cell ?? cell.column.columnDef.header,
                             cell.getContext()

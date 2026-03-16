@@ -79,9 +79,10 @@ async function processNextJob() {
         }
       } else {
         success += 1;
-      }
-      if (warnings.length) {
-        warningCount += 1;
+        // Only count warnings on rows that were imported (no errors)
+        if (warnings.length) {
+          warningCount += warnings.length;
+        }
       }
 
       if (processed % 200 === 0) {

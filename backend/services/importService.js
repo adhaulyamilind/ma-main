@@ -99,7 +99,7 @@ export function getAnalytics() {
     .all();
   const totals = { imported: 0, errors: 0, warnings: 0 };
   const statusCounts = {};
-  const trend = new Map(); // date (YYYY-MM-DD) -> { date, imported, errors }
+  const trend = []; // one point per job with created_at timestamp
   const errorReasons = new Map(); // code -> count
   const supplierQuality = new Map(); // supplier_gstin -> { supplier, imported, warnings, errors }
   const posMix = new Map(); // place_of_supply -> count
@@ -119,17 +119,22 @@ export function getAnalytics() {
   }
 
   for (const job of allJobs) {
-    totals.imported += job.successCount || 0;
-    totals.errors += job.errorCount || 0;
-    totals.warnings += job.warningCount || 0;
+    // import_batch columns are snake_case; map them into our totals
+    const imported = job.success_count || 0;
+    const errors = job.error_count || 0;
+    const warnings = job.warning_count || 0;
+
+    totals.imported += imported;
+    totals.errors += errors;
+    totals.warnings += warnings;
 
     statusCounts[job.status] = (statusCounts[job.status] || 0) + 1;
 
-    const d = job.uploadedAt?.slice(0, 10) || 'unknown';
-    if (!trend.has(d)) trend.set(d, { date: d, imported: 0, errors: 0 });
-    const t = trend.get(d);
-    t.imported += job.successCount || 0;
-    t.errors += job.errorCount || 0;
+    trend.push({
+      date: job.created_at,
+      imported,
+      errors
+    });
 
     const jobErrors = db
       .prepare(
@@ -199,9 +204,9 @@ export function getAnalytics() {
 
   const byJobErrors = allJobs.map((job) => ({
     job: job.id.slice(0, 6),
-    errors: job.errorCount || 0,
-    warnings: job.warningCount || 0,
-    imported: job.successCount || 0
+    errors: job.error_count || 0,
+    warnings: job.warning_count || 0,
+    imported: job.success_count || 0
   }));
 
   const errorReasonsData = Array.from(errorReasons.entries())
@@ -224,9 +229,7 @@ export function getAnalytics() {
       return order.indexOf(a.bucket) - order.indexOf(b.bucket);
     });
 
-  const trendData = Array.from(trend.values()).sort((a, b) =>
-    a.date.localeCompare(b.date)
-  );
+  const trendData = trend.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 
   const jobStatusTotals = {
     total: allJobs.length,
