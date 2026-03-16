@@ -248,26 +248,65 @@ export function getAnalytics() {
   };
 }
 
-export function buildErrorsCsv(job) {
-  const header = 'row,field,code,value,supplier_gstin,invoice_number,invoice_date,taxable_amount,igst_amount,cgst_amount,sgst_amount,place_of_supply\n';
-  const errorRows = new Set(job.errors.map((e) => e.row));
-  const rowMap = new Map();
-  for (const r of job.allRows || []) {
-    rowMap.set(r._rowIndex, r);
+export function buildErrorsCsv(batch) {
+  const header =
+    'row,field,code,value,supplier_gstin,invoice_number,invoice_date,taxable_amount,igst_amount,cgst_amount,sgst_amount,place_of_supply\n';
+
+  const errors = db
+    .prepare(
+      `SELECT row_number as row, field, code, value
+         FROM import_error
+        WHERE batch_id = ?
+        ORDER BY row_number`
+    )
+    .all(batch.id);
+
+  if (!errors.length) {
+    return header; // header-only CSV when there are no errors
   }
+
+  const invoices = db
+    .prepare(
+      `SELECT
+         row_number,
+         supplier_gstin,
+         invoice_number,
+         invoice_date,
+         taxable_amount,
+         igst_amount,
+         cgst_amount,
+         sgst_amount,
+         place_of_supply
+       FROM invoice
+      WHERE batch_id = ?`
+    )
+    .all(batch.id);
+
+  const rowMap = new Map();
+  for (const r of invoices) {
+    rowMap.set(r.row_number, r);
+  }
+
   const lines = [];
-  for (const rowNum of errorRows) {
-    const row = rowMap.get(rowNum);
-    const rowErrs = job.errors.filter((e) => e.row === rowNum);
+  for (const e of errors) {
+    const row = rowMap.get(e.row);
     const vals = row
-      ? [row.supplier_gstin, row.invoice_number, row.invoice_date, row.taxable_amount, row.igst_amount, row.cgst_amount, row.sgst_amount, row.place_of_supply]
+      ? [
+          row.supplier_gstin,
+          row.invoice_number,
+          row.invoice_date,
+          row.taxable_amount,
+          row.igst_amount,
+          row.cgst_amount,
+          row.sgst_amount,
+          row.place_of_supply
+        ]
       : ['', '', '', '', '', '', '', ''];
     const esc = (v) => (v == null ? '' : `"${String(v).replace(/"/g, '""')}"`);
     const rest = vals.map(esc).join(',');
-    for (const e of rowErrs) {
-      lines.push([e.row, e.field, e.code, esc(e.value), rest].join(','));
-    }
+    lines.push([e.row, e.field, e.code, esc(e.value), rest].join(','));
   }
+
   return header + lines.join('\n');
 }
 
