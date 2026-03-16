@@ -158,6 +158,10 @@ th { background: rgba(15, 23, 42, 0.95); color: #e5e7eb; font-weight: 500; }
 td { background: rgba(15, 23, 42, 0.75); }
 tr:nth-child(even) td { background: rgba(15, 23, 42, 0.9); }
 table button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   padding: 0.4rem 0.9rem;
   font-size: 0.85rem;
   border-radius: 999px;
