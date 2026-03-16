@@ -12,7 +12,7 @@ router.post('/upload', upload.single('file'), (req, res) => {
     return res.status(400).json({ error: 'No file uploaded' });
   }
   const jobId = `job_${Date.now()}`;
-  const { rows } = parseFile(req.file.buffer, req.file.mimetype);
+  const { rows } = parseFile(req.file.buffer, req.file.mimetype, req.file.originalname);
   const preview = rows.slice(0, 10);
   jobs.set(jobId, {
     status: 'done',

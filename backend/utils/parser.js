@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 
 const EXPECTED_HEADERS = [
   'supplier_gstin',
@@ -26,13 +27,29 @@ function normalizeHeaders(row) {
   return normalized;
 }
 
-export function parseFile(buffer, mimeType) {
+function parseCsv(buffer) {
   const str = buffer.toString('utf-8');
   const parsed = Papa.parse(str, { header: true, skipEmptyLines: true });
-  if (!parsed.data || !parsed.data.length) {
-    return { rows: [], errors: [{ message: 'No data rows found' }] };
+  return parsed.data || [];
+}
+
+function parseXlsx(buffer) {
+  const wb = XLSX.read(buffer, { type: 'buffer' });
+  const sheetName = wb.SheetNames[0];
+  if (!sheetName) return [];
+  const sheet = wb.Sheets[sheetName];
+  return XLSX.utils.sheet_to_json(sheet);
+}
+
+export function parseFile(buffer, mimeType = '', filename = '') {
+  const isExcel =
+    mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+    /\.xlsx$/i.test(filename || '');
+  const rawRows = isExcel ? parseXlsx(buffer) : parseCsv(buffer);
+  if (!rawRows.length) {
+    return { rows: [] };
   }
-  const rows = parsed.data.map((row, i) => ({
+  const rows = rawRows.map((row, i) => ({
     _rowIndex: i + 2,
     ...normalizeHeaders(row)
   }));
