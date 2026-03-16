@@ -8,6 +8,28 @@
 .sub { color: #666; margin-bottom: 1.5rem; }
 .empty-hint { color: #888; font-size: 0.9rem; margin-top: -0.5rem; margin-bottom: 1rem; }
 
+.tabs {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 0.15rem;
+  background: #f1f3f5;
+  margin-bottom: 1.25rem;
+}
+.tab {
+  border: none;
+  background: transparent;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #495057;
+}
+.tab.active {
+  background: #fff;
+  box-shadow: 0 0 0 1px #dee2e6;
+  color: #111827;
+}
+
 .upload-section {
   display: flex;
   gap: 0.75rem;
@@ -84,3 +106,14 @@ th { background: #f5f5f5; }
   font-size: 0.875rem;
 }
 .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.dashboard-header h2 {
+  margin: 0;
+}

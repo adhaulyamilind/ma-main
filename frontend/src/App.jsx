@@ -11,6 +11,8 @@ export default function App() {
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
   const [errorPage, setErrorPage] = useState(0)
+  const [jobs, setJobs] = useState([])
+  const [activeTab, setActiveTab] = useState('upload')
   const ERROR_PAGE_SIZE = 10
 
   const onFileChange = (e) => {
@@ -43,6 +45,7 @@ export default function App() {
       setPreview(data.preview_rows || [])
       setResult(null)
       fetchResult(data.job_id)
+      fetchJobs()
     } catch (err) {
       setError(err.message || 'Upload failed')
     } finally {
@@ -69,26 +72,67 @@ export default function App() {
     window.open(`${API}/import/${jobId}/errors.csv`, '_blank')
   }
 
+  const fetchJobs = async () => {
+    try {
+      const res = await fetch(`${API}/import`)
+      if (!res.ok) return
+      const data = await res.json()
+      setJobs(data.jobs || [])
+    } catch (_) {}
+  }
+
+  const viewJob = (id) => {
+    setJobId(id)
+    setResult(null)
+    setErrorPage(0)
+    fetchResult(id)
+    setActiveTab('upload')
+  }
+
   const columns = ['supplier_gstin', 'invoice_number', 'invoice_date', 'taxable_amount', 'igst_amount', 'cgst_amount', 'sgst_amount', 'place_of_supply']
 
   return (
     <div className="app">
       <h1>GST Purchase Invoice Import</h1>
-      <p className="sub">Upload CSV or Excel file to import purchase invoices.</p>
+      <p className="sub">Upload CSV or Excel file, and review past imports.</p>
 
-      <div className="upload-section">
-        <input type="file" accept=".csv,.xlsx" onChange={onFileChange} />
-        <button onClick={upload} disabled={!file || loading}>
-          {loading ? 'Importing...' : 'Upload & Import'}
+      <div className="tabs">
+        <button
+          type="button"
+          className={activeTab === 'upload' ? 'tab active' : 'tab'}
+          onClick={() => setActiveTab('upload')}
+        >
+          Upload
+        </button>
+        <button
+          type="button"
+          className={activeTab === 'dashboard' ? 'tab active' : 'tab'}
+          onClick={() => {
+            setActiveTab('dashboard')
+            fetchJobs()
+          }}
+        >
+          Imports dashboard
         </button>
       </div>
-      {!file && (
-        <p className="empty-hint">Select a CSV or Excel file to get started.</p>
+
+      {activeTab === 'upload' && (
+        <>
+          <div className="upload-section">
+            <input type="file" accept=".csv,.xlsx" onChange={onFileChange} />
+            <button onClick={upload} disabled={!file || loading}>
+              {loading ? 'Importing...' : 'Upload & Import'}
+            </button>
+          </div>
+          {!file && (
+            <p className="empty-hint">Select a CSV or Excel file to get started.</p>
+          )}
+        </>
       )}
 
       {error && <div className="error-box">{error}</div>}
 
-      {preview.length > 0 && (
+      {activeTab === 'upload' && preview.length > 0 && (
         <div className="preview-section">
           <h2>Preview (first 10 rows)</h2>
           <div className="table-wrap">
@@ -114,7 +158,7 @@ export default function App() {
         </div>
       )}
 
-      {result && (
+      {activeTab === 'upload' && result && (
         <div className="result-section">
           <h2>Import Summary</h2>
           <div className="summary-cards">
@@ -175,6 +219,60 @@ export default function App() {
             </>
           )}
           <button className="secondary" onClick={loadResult}>Refresh result</button>
+        </div>
+      )}
+
+      {activeTab === 'dashboard' && (
+        <div className="preview-section">
+          <div className="dashboard-header">
+            <h2>Imports dashboard</h2>
+            <button type="button" onClick={fetchJobs}>
+              Refresh
+            </button>
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Job ID</th>
+                  <th>File</th>
+                  <th>Uploaded at</th>
+                  <th>Status</th>
+                  <th>Summary</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {jobs.map((j) => (
+                  <tr key={j.job_id}>
+                    <td>{j.job_id}</td>
+                    <td>{j.file_name}</td>
+                    <td>{new Date(j.uploaded_at).toLocaleString()}</td>
+                    <td>{j.status}</td>
+                    <td>
+                      {j.imported} imported · {j.warnings} warnings · {j.errors} errors
+                    </td>
+                    <td>
+                      <button type="button" onClick={() => viewJob(j.job_id)}>
+                        View
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => window.open(`${API}/import/${j.job_id}/errors.csv`, '_blank')}
+                      >
+                        Errors CSV
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {jobs.length === 0 && (
+                  <tr>
+                    <td colSpan={6}>No imports yet.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

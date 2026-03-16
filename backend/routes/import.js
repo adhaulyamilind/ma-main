@@ -21,6 +21,9 @@ router.post('/upload', upload.single('file'), (req, res) => {
   const { errors, warnings, validRows, successCount, errorCount } = validateAllRows(rows, taxPeriod);
   const preview = rows.slice(0, 10);
   jobs.set(jobId, {
+    id: jobId,
+    fileName: req.file.originalname,
+    uploadedAt: new Date().toISOString(),
     status: 'done',
     totalRows: rows.length,
     successCount,
@@ -37,6 +40,22 @@ router.post('/upload', upload.single('file'), (req, res) => {
     preview_rows: preview,
     summary: { total_rows: rows.length, valid: successCount, errors: errorCount }
   });
+});
+
+router.get('/', (req, res) => {
+  const list = Array.from(jobs.values())
+    .sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1))
+    .map((job) => ({
+      job_id: job.id,
+      file_name: job.fileName,
+      uploaded_at: job.uploadedAt,
+      status: job.status,
+      total_rows: job.totalRows,
+      imported: job.successCount,
+      warnings: job.warningCount || 0,
+      errors: job.errorCount
+    }));
+  res.json({ jobs: list });
 });
 
 router.get('/:jobId/status', (req, res) => {
