@@ -185,9 +185,17 @@ export function getAnalytics() {
     a.date.localeCompare(b.date)
   );
 
+  const jobStatusTotals = {
+    total: allJobs.length,
+    pending: (statusCounts.queued || 0) + (statusCounts.processing || 0),
+    done: statusCounts.done || 0,
+    failed: statusCounts.failed || 0
+  };
+
   return {
     totals,
     statusData,
+    jobStatusTotals,
     byJobErrors,
     trend: trendData,
     errorReasons: errorReasonsData,

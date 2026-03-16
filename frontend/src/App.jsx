@@ -185,7 +185,7 @@ export default function App() {
         )}
 
         {activeTab === 'analytics' && (
-        <AnalyticsTab summary={analytics || { ...statusSummary, trend: [], errorReasons: [], supplierQuality: [], posMix: [], rateBuckets: [] }} />
+        <AnalyticsTab summary={analytics || { ...statusSummary, jobStatusTotals: null, trend: [], errorReasons: [], supplierQuality: [], posMix: [], rateBuckets: [] }} />
         )}
       </div>
 

@@ -18,6 +18,22 @@ export function AnalyticsTab({ summary }) {
           <div className="metric-label">Errors</div>
           <div className="metric-value">{summary.totals.errors}</div>
         </div>
+        {summary.jobStatusTotals && (
+          <>
+            <div className="metric-card">
+              <div className="metric-label">Jobs pending</div>
+              <div className="metric-value">{summary.jobStatusTotals.pending}</div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">Jobs done</div>
+              <div className="metric-value">{summary.jobStatusTotals.done}</div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">Jobs failed</div>
+              <div className="metric-value">{summary.jobStatusTotals.failed}</div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="charts-grid">
