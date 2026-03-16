@@ -33,11 +33,11 @@ export function AnalyticsTab({ summary }) {
           <div className="metric-value metric-value--imported">{summary.totals.imported}</div>
         </div>
         <div className="metric-card warn">
-          <div className="metric-label">Warnings</div>
+          <div className="metric-label">Warning invoices</div>
           <div className="metric-value metric-value--warnings">{summary.totals.warnings}</div>
         </div>
         <div className="metric-card err">
-          <div className="metric-label">Errors</div>
+          <div className="metric-label">Error invoices</div>
           <div className="metric-value metric-value--errors">{summary.totals.errors}</div>
         </div>
         {summary.jobStatusTotals && (
