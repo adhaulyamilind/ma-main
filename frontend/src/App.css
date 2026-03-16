@@ -167,6 +167,27 @@ table button:hover {
 .dashboard-header h2 {
   margin: 0;
 }
+.dashboard-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.dashboard-controls input[type="search"] {
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+  font-size: 0.85rem;
+  min-width: 220px;
+}
+.dashboard-controls input[type="search"]::placeholder {
+  color: #6b7280;
+}
+.dashboard-controls button {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+}
 
 .analytics {
   margin-top: 2rem;

@@ -1,9 +1,21 @@
+import { useState, useMemo } from 'react'
 import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table'
 import { errorsCsvUrl } from '../api/importApi'
 
 export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
+  const [query, setQuery] = useState('')
+  const filteredJobs = useMemo(() => {
+    if (!query) return jobs
+    const q = query.toLowerCase().trim()
+    return jobs.filter(
+      (j) =>
+        j.job_id.toLowerCase().includes(q) ||
+        (j.file_name && j.file_name.toLowerCase().includes(q))
+    )
+  }, [jobs, query])
+
   const table = useReactTable({
-    data: jobs,
+    data: filteredJobs,
     columns,
     getCoreRowModel: getCoreRowModel()
   })
@@ -11,10 +23,24 @@ export function JobsDashboard({ jobs, columns, onRefresh, onViewJob }) {
   return (
     <div className="preview-section">
       <div className="dashboard-header">
-        <h2>Imports dashboard</h2>
-        <button type="button" onClick={onRefresh}>
-          Refresh
-        </button>
+        <div>
+          <h2>Previous uploads</h2>
+          <p className="sub small">
+            Search by Job ID or file name to quickly inspect a past run.
+          </p>
+        </div>
+        <div className="dashboard-controls">
+          <input
+            type="search"
+            placeholder="Search by Job ID or file name"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Search uploads by Job ID or file name"
+          />
+          <button type="button" onClick={onRefresh}>
+            Refresh
+          </button>
+        </div>
       </div>
       <div className="table-wrap">
         <table className="tan-table">
